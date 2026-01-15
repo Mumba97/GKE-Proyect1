@@ -1,25 +1,25 @@
 apiVersion: apps/v1 ## version de la api para deployment
 kind: Deployment    ## tipo de recurso u objeto que se va a crear
 metadata:           ## metadatos del deployment 
-  name: apache-deployment ## nombre del deployment
+  name: sidiam-deployment ## nombre del deployment
   namespace: frontend
   labels:           ## etiquetas para identificar el deployment
-    app: apache-app  ## etiqueta clave-valor
+    app: sidiam-app  ## etiqueta clave-valor
     environment: desarrollo
 spec:          ## especificacion del deployment
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
-      app: apache-app
+      app: sidiam-app
       environment: desarrollo
   template:
     metadata:
       labels:
-        app: apache-app
+        app: sidiam-app
         environment: desarrollo
     spec:
       containers:
-      - name: apache-container ##--> listas de contenedores dentro del pod
-        image: nginx:latest
+      - name: sidiam-container ##--> listas de contenedores dentro del pod
+        image: $IMAGE_NAME  ##--> imagen del contenedor (variable que se sustituye en el workflow)
         ports:
         - containerPort: 80

@@ -60,5 +60,5 @@ jobs:
       run: |-
         export IMAGE_NAME="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
         envsubst < k8s/frontend.yaml | kubectl apply -f -
-        kubectl rollout status deployment/apache-deployment -n frontend
+        kubectl rollout status deployment/sidiam-deployment -n frontend
         kubectl apply -f k8s/service.yaml
