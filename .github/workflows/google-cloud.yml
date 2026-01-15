@@ -7,9 +7,9 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GKE_CLUSTER: sidiam-cluster    # Pon el nombre de tu cluster
-  GKE_ZONE: us-central1-a        # Pon la zona de tu cluster
-  GAR_REPO: sidiam-repo          # Nombre de tu repo en Artifact Registry
-  GAR_REGION: us-central1        # Región de tu repo Artifact Registry
+  GKE_ZONE: us-east4-a        # Pon la zona de tu cluster
+  GAR_REPO: proyecto-sidiam          # Nombre de tu repo en Artifact Registry
+  GAR_REGION: us-east4      # Región de tu repo Artifact Registry
   IMAGE: sidiam-frontend
 
 jobs:
