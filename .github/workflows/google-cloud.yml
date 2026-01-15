@@ -59,5 +59,6 @@ jobs:
     - name: Deploy
       run: |-
         export IMAGE_NAME="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
-        envsubst < k8s/deployment.yaml | kubectl apply -f -
+        envsubst < k8s/frontend.yaml | kubectl apply -f -
         kubectl rollout status deployment/sidiam-web
+        kubectl apply -f k8s/service.yaml
