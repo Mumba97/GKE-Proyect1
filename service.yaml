@@ -4,12 +4,12 @@ metadata:
   name: frontend-service
   namespace: frontend
   labels:
-    app: apache-app
+    app: sidiam-app
     environment: desarrollo
 spec:
   type: LoadBalancer
   selector:
-    app: apache-app
+    app: sidiam-app
     environment: desarrollo
   ports:
   - protocol: TCP
