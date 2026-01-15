@@ -1,1 +1,63 @@
+name: Despliegue a GKE
 
+on:
+  push:
+    branches: [ "main" ] # Se activa al hacer push a main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: sidiam-cluster    # Pon el nombre de tu cluster
+  GKE_ZONE: us-central1-a        # Pon la zona de tu cluster
+  GAR_REPO: sidiam-repo          # Nombre de tu repo en Artifact Registry
+  GAR_REGION: us-central1        # Región de tu repo Artifact Registry
+  IMAGE: sidiam-frontend
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # 1. Autenticación con Google Cloud
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    # 2. Configurar Docker para usar la autenticación de GCloud
+    - name: Docker configuration
+      run: |-
+        gcloud auth configure-docker $GAR_REGION-docker.pkg.dev
+
+    # 3. Obtener credenciales del Cluster (para poder usar kubectl)
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v2'
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+
+    # 4. Construir y Etiquetar la Imagen Docker
+    # Usamos el SHA del commit (github.sha) para que cada versión sea única
+    - name: Build
+      run: |-
+        docker build \
+          --tag "$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA" \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" \
+          .
+
+    # 5. Subir la imagen a Artifact Registry
+    - name: Publish
+      run: |-
+        docker push "$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
+
+    # 6. Desplegar en GKE
+    # Usamos envsubst para cambiar la variable $IMAGE_NAME en el yaml por la imagen real
+    - name: Deploy
+      run: |-
+        export IMAGE_NAME="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
+        envsubst < k8s/deployment.yaml | kubectl apply -f -
+        kubectl rollout status deployment/sidiam-web
