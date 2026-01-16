@@ -32,12 +32,12 @@ jobs:
       run: |-
         gcloud auth configure-docker $GAR_REGION-docker.pkg.dev
 
-    # 3. Obtener credenciales del Cluster (para poder usar kubectl)
-    - id: 'get-credentials'
-      uses: 'google-github-actions/get-gke-credentials@v2'
-      with:
-        cluster_name: ${{ env.GKE_CLUSTER }}
-        location: ${{ env.GKE_ZONE }}
+    # # 3. Obtener credenciales del Cluster (para poder usar kubectl)
+    # - id: 'get-credentials'
+    #   uses: 'google-github-actions/get-gke-credentials@v2'
+    #   with:
+    #     cluster_name: ${{ env.GKE_CLUSTER }}
+    #     location: ${{ env.GKE_ZONE }}
 
     # 4. Construir y Etiquetar la Imagen Docker
     # Usamos el SHA del commit (github.sha) para que cada versión sea única
@@ -54,11 +54,11 @@ jobs:
       run: |-
         docker push "$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
 
-    # 6. Desplegar en GKE
-    # Usamos envsubst para cambiar la variable $IMAGE_NAME en el yaml por la imagen real
-    - name: Deploy
-      run: |-
-        export IMAGE_NAME="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
-        envsubst < k8s/frontend.yaml | kubectl apply -f -
-        kubectl rollout status deployment/sidiam-deployment -n frontend
-        kubectl apply -f k8s/service.yaml
+    # # 6. Desplegar en GKE
+    # # Usamos envsubst para cambiar la variable $IMAGE_NAME en el yaml por la imagen real
+    # - name: Deploy
+    #   run: |-
+    #     export IMAGE_NAME="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$GAR_REPO/$IMAGE:$GITHUB_SHA"
+    #     envsubst < k8s/frontend.yaml | kubectl apply -f -
+    #     kubectl rollout status deployment/sidiam-deployment -n frontend
+    #     kubectl apply -f k8s/service.yaml
